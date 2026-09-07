@@ -1,0 +1,17 @@
+{
+  "processingId": "proc-998877",
+  "cartaoIdentificado": "Nubank",
+  "transactions": [
+    {
+      "tempId": "tmp-001",
+      "descricao": "Notebook",
+      "categoria": "Eletrônicos",
+      "valorParcela": 250.00,
+      "tipo": "parcelado",
+      "parcelaAtual": 3,
+      "totalParcelas": 10,
+      "mappingStatus": "MATCHED",
+      "matchedGastoPaiId": "a1b2c3d4-0000-0000-0000-000000000000"
+    }
+  ]
+}
