@@ -55,7 +55,7 @@ class Config:
     else:
         # Em desenvolvimento, usar variável de ambiente ou padrão
         UPLOAD_FOLDER = upload_folder_env if upload_folder_env else './uploads'
-    ALLOWED_EXTENSIONS = {'pdf'
+    ALLOWED_EXTENSIONS = {'pdf'}
     
     # Configurações de OCR
     OCR_ENABLED = os.getenv('OCR_ENABLED', 'True').lower() == 'true'
