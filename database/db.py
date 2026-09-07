@@ -18,19 +18,37 @@ def get_db_connection():
         psycopg2.extensions.connection: Conexão com o banco de dados
     """
     try:
+        # Tentar conexão forçando IPv4 para evitar problemas na Vercel
         connection = psycopg2.connect(
             host=Config.DB_HOST,
             port=Config.DB_PORT,
             database=Config.DB_NAME,
             user=Config.DB_USER,
             password=Config.DB_PASSWORD,
-            cursor_factory=RealDictCursor
+            cursor_factory=RealDictCursor,
+            connect_timeout=10
         )
         logger.info("Conexão com banco de dados estabelecida com sucesso")
         return connection
     except Exception as e:
         logger.error(f"Erro ao conectar ao banco de dados: {e}")
-        raise
+        # Tentar conexão alternativa com hostaddr para forçar IPv4
+        try:
+            logger.info("Tentando conexão alternativa forçando IPv4...")
+            connection = psycopg2.connect(
+                hostaddr=Config.DB_HOST,  # Força resolução IPv4
+                port=Config.DB_PORT,
+                database=Config.DB_NAME,
+                user=Config.DB_USER,
+                password=Config.DB_PASSWORD,
+                cursor_factory=RealDictCursor,
+                connect_timeout=10
+            )
+            logger.info("Conexão com banco de dados estabelecida com sucesso (IPv4)")
+            return connection
+        except Exception as e2:
+            logger.error(f"Erro na conexão alternativa: {e2}")
+            raise
 
 def init_db():
     """

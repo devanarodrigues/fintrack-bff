@@ -31,8 +31,13 @@ class Config:
     # URL de conexão com o banco de dados
     @staticmethod
     def get_database_url():
-        """Retorna a URL de conexão com o banco de dados PostgreSQL"""
-        return f"postgresql://{Config.DB_USER}:{Config.DB_PASSWORD}@{Config.DB_HOST}:{Config.DB_PORT}/{Config.DB_NAME}"
+        """Retorna a URL de conexão com o banco de dados PostgreSQL
+        
+        Força IPv4 para evitar problemas de conexão IPv6 na Vercel
+        """
+        # Forçar uso de IPv4 adicionando parâmetro hostaddr
+        # Isso resolve problemas de conexão IPv6 na Vercel
+        return f"postgresql://{Config.DB_USER}:{Config.DB_PASSWORD}@{Config.DB_HOST}:{Config.DB_PORT}/{Config.DB_NAME}?hostaddr={Config.DB_HOST}"
     
     # Configurações da API
     API_HOST = os.getenv('API_HOST', '0.0.0.0')
@@ -42,8 +47,15 @@ class Config:
     # Configurações de Upload
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
     # Na Vercel, usar /tmp para arquivos temporários
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp' if IS_VERCEL else './uploads')
-    ALLOWED_EXTENSIONS = {'pdf'}
+    # Mas na Vercel Integration, pode vir como ./uploads, então corrigir
+    upload_folder_env = os.getenv('UPLOAD_FOLDER')
+    if IS_VERCEL:
+        # Forçar /tmp na Vercel
+        UPLOAD_FOLDER = '/tmp'
+    else:
+        # Em desenvolvimento, usar variável de ambiente ou padrão
+        UPLOAD_FOLDER = upload_folder_env if upload_folder_env else './uploads'
+    ALLOWED_EXTENSIONS = {'pdf'
     
     # Configurações de OCR
     OCR_ENABLED = os.getenv('OCR_ENABLED', 'True').lower() == 'true'
