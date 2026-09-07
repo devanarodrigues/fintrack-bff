@@ -21,7 +21,9 @@ class Config:
     IS_VERCEL = IS_VERCEL
     
     # Configurações do Banco de Dados PostgreSQL
-    # Na Vercel, pode usar Supabase ou outro banco PostgreSQL gerenciado
+    # Prioridade: DATABASE_URL > variáveis individuais
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_PORT = os.getenv('DB_PORT', '5432')
     DB_NAME = os.getenv('DB_NAME', 'fintrack')
@@ -33,11 +35,11 @@ class Config:
     def get_database_url():
         """Retorna a URL de conexão com o banco de dados PostgreSQL
         
-        Força IPv4 para evitar problemas de conexão IPv6 na Vercel
+        Prioriza DATABASE_URL se disponível, caso contrário monta das variáveis individuais
         """
-        # Forçar uso de IPv4 adicionando parâmetro hostaddr
-        # Isso resolve problemas de conexão IPv6 na Vercel
-        return f"postgresql://{Config.DB_USER}:{Config.DB_PASSWORD}@{Config.DB_HOST}:{Config.DB_PORT}/{Config.DB_NAME}?hostaddr={Config.DB_HOST}"
+        if Config.DATABASE_URL:
+            return Config.DATABASE_URL
+        return f"postgresql://{Config.DB_USER}:{Config.DB_PASSWORD}@{Config.DB_HOST}:{Config.DB_PORT}/{Config.DB_NAME}"
     
     # Configurações da API
     API_HOST = os.getenv('API_HOST', '0.0.0.0')
@@ -47,14 +49,7 @@ class Config:
     # Configurações de Upload
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
     # Na Vercel, usar /tmp para arquivos temporários
-    # Mas na Vercel Integration, pode vir como ./uploads, então corrigir
-    upload_folder_env = os.getenv('UPLOAD_FOLDER')
-    if IS_VERCEL:
-        # Forçar /tmp na Vercel
-        UPLOAD_FOLDER = '/tmp'
-    else:
-        # Em desenvolvimento, usar variável de ambiente ou padrão
-        UPLOAD_FOLDER = upload_folder_env if upload_folder_env else './uploads'
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp' if IS_VERCEL else './uploads')
     ALLOWED_EXTENSIONS = {'pdf'}
     
     # Configurações de OCR
