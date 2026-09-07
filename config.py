@@ -11,11 +11,14 @@ from dotenv import load_dotenv
 if os.getenv('VERCEL') != '1':
     load_dotenv()
 
+# Detectar se está rodando na Vercel (antes da classe para evitar NameError)
+IS_VERCEL = os.getenv('VERCEL') == '1'
+
 class Config:
     """Configurações da aplicação"""
     
     # Detectar se está rodando na Vercel
-    IS_VERCEL = os.getenv('VERCEL') == '1'
+    IS_VERCEL = IS_VERCEL
     
     # Configurações do Banco de Dados PostgreSQL
     # Na Vercel, pode usar Supabase ou outro banco PostgreSQL gerenciado
@@ -39,7 +42,7 @@ class Config:
     # Configurações de Upload
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
     # Na Vercel, usar /tmp para arquivos temporários
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp' if Config.IS_VERCEL else './uploads')
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', '/tmp' if IS_VERCEL else './uploads')
     ALLOWED_EXTENSIONS = {'pdf'}
     
     # Configurações de OCR
@@ -49,7 +52,7 @@ class Config:
     @staticmethod
     def get_upload_folder():
         """Retorna a pasta de uploads correta para o ambiente"""
-        if Config.IS_VERCEL:
+        if IS_VERCEL:
             # Na Vercel, usar /tmp que é o único diretório gravável
             upload_dir = '/tmp/uploads'
             os.makedirs(upload_dir, exist_ok=True)
