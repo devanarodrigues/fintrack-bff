@@ -45,6 +45,15 @@ except ImportError as e:
     reports_bp = None
     init_db = None
 
+# Tentar importar o blueprint de invoices (novo)
+try:
+    from invoices_route import invoices_bp
+    print("DEBUG: invoices_bp import successful")
+except ImportError as e:
+    print(f"WARNING: Failed to import invoices_bp: {e}")
+    print(f"WARNING: Traceback: {traceback.format_exc()}")
+    invoices_bp = None
+
 app = Flask(__name__)
 CORS(app)
 
@@ -52,6 +61,7 @@ CORS(app)
 app.config['JSON_AS_ASCII'] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.config['UPLOAD_FOLDER'] = '/tmp'  # Vercel usa /tmp para arquivos temporários
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB máximo
 
 # Registrar blueprints (rotas) apenas se importaram com sucesso
 if expenses_bp:
@@ -89,6 +99,14 @@ if reports_bp:
     except Exception as e:
         print(f"ERROR: Failed to register reports_bp: {e}")
 
+# Registrar novo blueprint de invoices
+if invoices_bp:
+    try:
+        app.register_blueprint(invoices_bp, url_prefix='/api/v1')
+        print("DEBUG: invoices_bp registered successfully")
+    except Exception as e:
+        print(f"ERROR: Failed to register invoices_bp: {e}")
+
 # Inicializar banco de dados (apenas se não estiver em ambiente de teste)
 if init_db:
     try:
@@ -108,7 +126,14 @@ def health_check():
         'service': 'FinTrack BFF',
         'version': '1.0.0',
         'environment': 'vercel-serverless',
-        'routes_registered': bool(expenses_bp)
+        'routes_registered': {
+            'expenses': bool(expenses_bp),
+            'dashboard': bool(dashboard_bp),
+            'upload': bool(upload_bp),
+            'analytics': bool(analytics_bp),
+            'reports': bool(reports_bp),
+            'invoices': bool(invoices_bp)
+        }
     })
 
 @app.route('/debug')
@@ -120,6 +145,19 @@ def debug_info():
         'path': sys.path,
         'environment': dict(os.environ),
         'flask_config': {k: str(v) for k, v in app.config.items() if k.isupper()}
+    })
+
+@app.route('/api/v1/health')
+def api_health():
+    """Health check para a API v1"""
+    return jsonify({
+        'status': 'operational',
+        'version': '1.0.0',
+        'endpoints': {
+            '/api/v1/invoices/process': 'POST - Processar fatura PDF',
+            '/api/v1/invoices/process/debug': 'POST - Processar fatura com debug',
+            '/api/v1/invoices/health': 'GET - Status do serviço de invoices'
+        }
     })
 
 @app.errorhandler(404)
@@ -156,6 +194,7 @@ __all__ = ['app', 'handler']
 
 print("DEBUG: api/index.py loaded successfully")
 print("DEBUG: Flask app created and configured")
+print("DEBUG: Invoice processing module integrated")
 
 # NOTA: Não incluímos app.run() porque a Vercel gerencia a execução
 # Em ambiente local, você pode usar: python -c "from api.index import app; app.run(debug=True)"
