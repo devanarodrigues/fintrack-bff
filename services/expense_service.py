@@ -54,7 +54,7 @@ class ExpenseService:
                 expense_data.get('observacao')
             )
             
-            result = execute_query(query, params, fetch=True)
+            result = execute_query(query, params, fetch=True, commit=True)
             
             if result:
                 return dict(result[0])
@@ -209,7 +209,7 @@ class ExpenseService:
                 RETURNING *
             """
             
-            result = execute_query(query, tuple(params), fetch=True)
+            result = execute_query(query, tuple(params), fetch=True, commit=True)
             
             if result:
                 expense = dict(result[0])

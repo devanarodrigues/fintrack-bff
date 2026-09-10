@@ -127,7 +127,7 @@ def init_db():
         logger.error(f"Erro ao inicializar banco de dados: {e}")
         raise
 
-def execute_query(query, params=None, fetch=True):
+def execute_query(query, params=None, fetch=True, commit=False):
     """
     Executa uma query SQL no banco de dados
     
@@ -135,6 +135,7 @@ def execute_query(query, params=None, fetch=True):
         query (str): Query SQL a ser executada
         params (tuple): Parâmetros da query
         fetch (bool): Se True, retorna os resultados da query
+        commit (bool): Se True, faz commit da transação (para INSERT/UPDATE/DELETE com RETURNING)
     
     Returns:
         list: Lista de resultados se fetch=True, None caso contrário
@@ -146,6 +147,8 @@ def execute_query(query, params=None, fetch=True):
         
         if fetch:
             results = cursor.fetchall()
+            if commit:
+                connection.commit()  # Commit antes de fechar para operações de escrita
             cursor.close()
             connection.close()
             return results
