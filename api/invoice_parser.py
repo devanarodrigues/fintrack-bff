@@ -5,6 +5,7 @@ Adaptado de p.py para funcionar como módulo na API Flask
 import re
 import unicodedata
 from io import BytesIO
+<<<<<<< HEAD
 from typing import Dict, List
 import pdfplumber
 
@@ -15,8 +16,6 @@ def normalizar_texto(texto: str) -> str:
         return ""
     texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('utf-8')
     return texto.strip()
-
-
 def processar_fatura_pdf(arquivo_bytes: bytes) -> Dict:
     """
     Processa uma fatura em PDF (recebida como bytes)
