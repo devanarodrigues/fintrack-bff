@@ -1,0 +1,31 @@
+# ============================================
+# DEPENDÊNCIAS PYTHON PARA FINTRACK BFF
+# Adaptado para funcionar na Vercel (Serverless)
+# ============================================
+
+# Framework Web
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# Banco de Dados PostgreSQL
+psycopg2-binary==2.9.9
+
+# Configuração
+python-dotenv==1.0.0
+
+# OCR de PDFs
+pdfplumber==0.10.3
+
+# Geração de PDFs
+reportlab==4.0.7
+
+# Validação de dados
+pydantic==2.5.0
+
+# Logging aprimorado
+colorlog==6.8.0
+
+# Dependências específicas para Vercel (opcional)
+# gunicorn==21.2.0  # Não necessário em serverless, pode ser removido
+
+pdfplumber>=0.8.0
