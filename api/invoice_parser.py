@@ -5,7 +5,6 @@ Adaptado de p.py para funcionar como módulo na API Flask
 import re
 import unicodedata
 from io import BytesIO
-<<<<<<< HEAD
 from typing import Dict, List
 import pdfplumber
 
