@@ -45,7 +45,6 @@ except ImportError as e:
     reports_bp = None
     init_db = None
 
-<<<<<<< HEAD
 # Nota: O processamento de faturas foi integrado diretamente no routes/upload
 # Não precisamos mais do blueprint separado de invoices
 
@@ -93,6 +92,7 @@ if reports_bp:
         print("DEBUG: reports_bp registered")
     except Exception as e:
         print(f"ERROR: Failed to register reports_bp: {e}")
+
 # Inicializar banco de dados (apenas se não estiver em ambiente de teste)
 if init_db:
     try:
