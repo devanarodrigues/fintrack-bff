@@ -15,13 +15,15 @@ def normalizar_texto(texto: str) -> str:
         return ""
     texto = unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('utf-8')
     return texto.strip()
-def processar_fatura_pdf(arquivo_bytes: bytes) -> Dict:
+def processar_fatura_pdf(arquivo_bytes: bytes, year: int = None, month: int = None) -> Dict:
     """
     Processa uma fatura em PDF (recebida como bytes)
     Retorna um dicionário com os dados extraídos
 
     Args:
         arquivo_bytes: Conteúdo do arquivo PDF em bytes
+        year: Ano da fatura (para completar as datas no formato DD/MM)
+        month: Mês da fatura (para garantir que as datas usem o mês correto)
 
     Returns:
         Dict contendo:
@@ -56,6 +58,16 @@ def processar_fatura_pdf(arquivo_bytes: bytes) -> Dict:
             tipo_fatura = "MERCADO_PAGO"
         else:
             tipo_fatura = "ITAU"
+
+        # Se não foi fornecido o ano, usar o ano atual
+        if year is None:
+            from datetime import datetime
+            year = datetime.now().year
+
+        # Se não foi fornecido o mês, usar o mês atual
+        if month is None:
+            from datetime import datetime
+            month = datetime.now().month
 
         # RegEx base para capturar data, estabelecimento com/sem parcela colada e valor
         padrao_transacao = re.compile(
@@ -127,8 +139,24 @@ def processar_fatura_pdf(arquivo_bytes: bytes) -> Dict:
             chave_unica = f"{dt}|{estab_limpo}|{parcela_str}|{valor_limpo}"
             if chave_unica not in vistos:
                 vistos.add(chave_unica)
+
+                # Usar o mês/ano informado para todas as datas da fatura
+                # Isso garante que as transações sejam atribuídas ao mês/ano correto
+                try:
+                    if dt and '/' in dt:
+                        partes = dt.split('/')
+                        dia = partes[0].zfill(2)  # Garantir que o dia tenha 2 dígitos
+                        # Usar o mês/ano informado em vez do mês extraído do PDF
+                        data_iso = f"{year}-{str(month).zfill(2)}-{dia}"
+                    else:
+                        # Se não tiver formato de data, usar o primeiro dia do mês/ano informado
+                        data_iso = f"{year}-{str(month).zfill(2)}-01"
+                except:
+                    # Fallback: usar o primeiro dia do mês/ano informado
+                    data_iso = f"{year}-{str(month).zfill(2)}-01"
+
                 movimentacoes.append({
-                    "data": dt,
+                    "data": data_iso,
                     "estabelecimento": estab_limpo,
                     "parcela": parcela_str,
                     "valor": valor_limpo

@@ -54,9 +54,13 @@ def upload_invoice():
         arquivo_bytes = file.read()
         
         logger.info(f"Processando fatura do cartão: {card}")
-        
+
+        # Converter year e month para int se fornecido
+        year_int = int(year) if year else None
+        month_int = int(month) if month else None
+
         # Processar fatura usando o novo parser
-        resultado = processar_fatura_pdf(arquivo_bytes)
+        resultado = processar_fatura_pdf(arquivo_bytes, year_int, month_int)
         
         if not resultado.get('success'):
             logger.error(f"Erro ao processar fatura: {resultado.get('erro')}")

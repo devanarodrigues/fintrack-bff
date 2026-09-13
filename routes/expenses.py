@@ -25,7 +25,7 @@ def get_expenses():
     """
     try:
         page = int(request.args.get('page', 1))
-        limit = int(request.args.get('limit', 10))
+        limit = int(request.args.get('limit', 100))  # Aumentado de 10 para 100
         search = request.args.get('search')
         category = request.args.get('category')
         card = request.args.get('card')

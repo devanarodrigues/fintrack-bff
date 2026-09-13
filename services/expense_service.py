@@ -5,6 +5,38 @@ from database.db import execute_query
 from datetime import datetime, date
 import uuid
 import logging
+import re
+
+def normalize_date_format(date_str):
+    """
+    Normaliza o formato da data para ISO (YYYY-MM-DD)
+    Aceita formatos: DD/MM/YYYY, YYYY-MM-DD, YYYY/MM/DD
+    """
+    if not date_str:
+        return None
+
+    # Se já estiver no formato ISO, retorna como está
+    if isinstance(date_str, date):
+        return date_str.isoformat()
+
+    date_str = str(date_str).strip()
+
+    # Se já estiver no formato YYYY-MM-DD
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+        return date_str
+
+    # Se estiver no formato DD/MM/YYYY, converte para YYYY-MM-DD
+    if '/' in date_str:
+        parts = date_str.split('/')
+        if len(parts) == 3:
+            # Verifica se está no formato DD/MM/YYYY
+            if len(parts[2]) == 4:  # Ano com 4 dígitos
+                return f"{parts[2]}-{parts[1]}-{parts[0]}"
+            # Se estiver no formato YYYY/MM/DD
+            elif len(parts[0]) == 4:
+                return f"{parts[0]}-{parts[1]}-{parts[2]}"
+
+    return date_str
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +73,7 @@ class ExpenseService:
             params = (
                 expense_id,
                 gasto_pai_id,
-                expense_data['data'],
+                normalize_date_format(expense_data['data']),
                 expense_data.get('cartao_id'),
                 expense_data['cartao_nome'],
                 expense_data['categoria'],
@@ -193,6 +225,9 @@ class ExpenseService:
             
             for field, value in expense_data.items():
                 if value is not None:
+                    # Normalizar formato de data se for o campo 'data'
+                    if field == 'data':
+                        value = normalize_date_format(value)
                     update_fields.append(f"{field} = %s")
                     params.append(value)
             
