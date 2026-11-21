@@ -191,7 +191,7 @@ def gemini_test():
         'status': 'ok',
         'message': 'Gemini endpoint is working (direct route)',
         'gemini_api_key_configured': bool(os.getenv('GEMINI_API_KEY')),
-        'gemini_model': os.getenv('GEMINI_MODEL', 'gemini-3.6-flash')
+        'gemini_model': 'gemini-3.5-flash-lite'
     })
 
 @app.route('/api/v1/gemini/generate-suggestion', methods=['POST', 'OPTIONS'])
@@ -213,7 +213,7 @@ def gemini_generate_suggestion():
     try:
         # Obter a API key da variável de ambiente
         api_key = os.getenv('GEMINI_API_KEY')
-        model = os.getenv('GEMINI_MODEL', 'gemini-3.6-flash')
+        model = 'gemini-3.5-flash-lite'
         
         print(f"DEBUG: API Key configured: {bool(api_key)}")
         print(f"DEBUG: Model: {model}")
