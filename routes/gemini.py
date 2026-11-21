@@ -20,6 +20,7 @@ def generate_suggestion():
     try:
         # Obter a API key da variável de ambiente
         api_key = os.getenv('GEMINI_API_KEY')
+        model = os.getenv('GEMINI_MODEL', 'gemini-3.6-flash')  # Default value
         
         if not api_key:
             return jsonify({
@@ -36,7 +37,7 @@ def generate_suggestion():
             }), 400
         
         # Fazer requisição para a API do Gemini
-        url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+        url = 'https://generativelanguage.googleapis.com/v1/interactions'
         
         headers = {
             'x-goog-api-key': api_key,
@@ -44,15 +45,8 @@ def generate_suggestion():
         }
         
         payload = {
-            'contents': [
-                {
-                    'parts': [
-                        {
-                            'text': prompt
-                        }
-                    ]
-                }
-            ]
+            'model': model,
+            'input': prompt
         }
         
         response = requests.post(url, headers=headers, json=payload, timeout=30)
@@ -64,7 +58,15 @@ def generate_suggestion():
             }), response.status_code
         
         result = response.json()
-        ai_response = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+        
+        # Extract response from steps array
+        ai_response = ''
+        if 'steps' in result and len(result['steps']) > 0:
+            for step in result['steps']:
+                if step.get('type') == 'model_output' and 'content' in step:
+                    for content in step['content']:
+                        if content.get('type') == 'text':
+                            ai_response += content.get('text', '')
         
         if not ai_response:
             return jsonify({
