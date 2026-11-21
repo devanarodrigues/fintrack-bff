@@ -32,6 +32,7 @@ try:
     from routes.upload import upload_bp
     from routes.analytics import analytics_bp
     from routes.reports import reports_bp
+    from routes.gemini import gemini_bp
     from database.db import init_db
     print("DEBUG: Route imports successful")
 except ImportError as e:
@@ -43,6 +44,7 @@ except ImportError as e:
     upload_bp = None
     analytics_bp = None
     reports_bp = None
+    gemini_bp = None
     init_db = None
 
 # Nota: O processamento de faturas foi integrado diretamente no routes/upload
@@ -93,6 +95,13 @@ if reports_bp:
     except Exception as e:
         print(f"ERROR: Failed to register reports_bp: {e}")
 
+if gemini_bp:
+    try:
+        app.register_blueprint(gemini_bp, url_prefix='/api/v1')
+        print("DEBUG: gemini_bp registered")
+    except Exception as e:
+        print(f"ERROR: Failed to register gemini_bp: {e}")
+
 # Inicializar banco de dados (apenas se não estiver em ambiente de teste)
 if init_db:
     try:
@@ -117,7 +126,8 @@ def health_check():
             'dashboard': bool(dashboard_bp),
             'upload': bool(upload_bp),
             'analytics': bool(analytics_bp),
-            'reports': bool(reports_bp)
+            'reports': bool(reports_bp),
+            'gemini': bool(gemini_bp)
         }
     })
 
