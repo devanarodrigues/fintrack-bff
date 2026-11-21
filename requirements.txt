@@ -13,6 +13,9 @@ psycopg2-binary==2.9.9
 # Configuração
 python-dotenv==1.0.0
 
+# HTTP Requests (para API Gemini)
+requests==2.31.0
+
 # OCR de PDFs
 pdfplumber==0.10.3
 
