@@ -35,6 +35,7 @@ try:
     from routes.gemini import gemini_bp
     from database.db import init_db
     print("DEBUG: Route imports successful")
+    print(f"DEBUG: gemini_bp imported: {gemini_bp}")
 except ImportError as e:
     print(f"ERROR: Failed to import routes: {e}")
     print(f"ERROR: Traceback: {traceback.format_exc()}")
@@ -98,9 +99,13 @@ if reports_bp:
 if gemini_bp:
     try:
         app.register_blueprint(gemini_bp, url_prefix='/api/v1')
-        print("DEBUG: gemini_bp registered")
+        print("DEBUG: gemini_bp registered successfully")
+        print(f"DEBUG: gemini_bp url_prefix: /api/v1")
     except Exception as e:
         print(f"ERROR: Failed to register gemini_bp: {e}")
+        print(f"ERROR: Traceback: {traceback.format_exc()}")
+else:
+    print("WARNING: gemini_bp is None, not registering")
 
 # Inicializar banco de dados (apenas se não estiver em ambiente de teste)
 if init_db:
@@ -139,7 +144,23 @@ def debug_info():
         'working_directory': os.getcwd(),
         'path': sys.path,
         'environment': dict(os.environ),
-        'flask_config': {k: str(v) for k, v in app.config.items() if k.isupper()}
+        'flask_config': {k: str(v) for k, v in app.config.items() if k.isupper()},
+        'routes': [str(rule) for rule in app.url_map.iter_rules()]
+    })
+
+@app.route('/debug/routes')
+def debug_routes():
+    """Debug endpoint para listar todas as rotas disponíveis"""
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'path': str(rule)
+        })
+    return jsonify({
+        'total_routes': len(routes),
+        'routes': routes
     })
 
 @app.route('/api/v1/health')
