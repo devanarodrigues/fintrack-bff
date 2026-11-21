@@ -9,6 +9,7 @@ from routes.dashboard import dashboard_bp
 from routes.upload import upload_bp
 from routes.analytics import analytics_bp
 from routes.reports import reports_bp
+from routes.gemini import gemini_bp
 from database.db import init_db
 
 app = Flask(__name__)
@@ -24,6 +25,7 @@ app.register_blueprint(dashboard_bp, url_prefix='/api/v1')
 app.register_blueprint(upload_bp, url_prefix='/api/v1')
 app.register_blueprint(analytics_bp, url_prefix='/api/v1')
 app.register_blueprint(reports_bp, url_prefix='/api/v1')
+app.register_blueprint(gemini_bp, url_prefix='/api/v1')
 
 # Inicializar banco de dados
 with app.app_context():
