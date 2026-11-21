@@ -4,11 +4,19 @@ import requests
 
 gemini_bp = Blueprint('gemini', __name__)
 
-@gemini_bp.route('/generate-suggestion', methods=['POST'])
+@gemini_bp.route('/generate-suggestion', methods=['POST', 'OPTIONS'])
 def generate_suggestion():
     """
     Gera sugestões de economia usando a API do Gemini
     """
+    # Handle CORS preflight request
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        return response
+    
     try:
         # Obter a API key da variável de ambiente
         api_key = os.getenv('GEMINI_API_KEY')
